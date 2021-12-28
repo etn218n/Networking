@@ -177,3 +177,4 @@ MonoBehaviour:
   syncInterval: 0.1
   correctSyncColor: {r: 0.14509805, g: 0.21568628, b: 0.15686275, a: 0}
   falseSyncColor: {r: 0.3764706, g: 0.1882353, b: 0.21568628, a: 0}
+  mainRenderer: {fileID: 4382968916439519929}

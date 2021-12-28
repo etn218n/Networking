@@ -1,25 +1,28 @@
 using Mirror;
 using UnityEngine;
 
-public class PlayerController : NetworkBehaviour
+public class PlayerController : NetworkEntity
 {
+    [Header("Stats")]
     [SerializeField] private float moveSpeed;
 
     private Vector3 desiredVelocity;
     private Rigidbody rigidBody;
 
-    private void Awake()
+    protected override void Awake()
     {
+        base.Awake();
+        
         rigidBody = GetComponent<Rigidbody>();
     }
 
-    private void Update()
+    public override void OnUpdate(float deltaTime)
     {
         if (hasAuthority)
             ProcessInput();
     }
 
-    private void FixedUpdate()
+    public override void OnFixedUpdate(float fixedDeltaTime)
     {
         if (isServer)
             Move();

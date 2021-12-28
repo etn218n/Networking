@@ -94,8 +94,8 @@ GameObject:
   - component: {fileID: 6203445761147555447}
   - component: {fileID: 7733781569213782227}
   - component: {fileID: 7733781569213782224}
-  - component: {fileID: 7733781569213782225}
   - component: {fileID: -613388586093088314}
+  - component: {fileID: 7733781569213782225}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -194,21 +194,6 @@ MonoBehaviour:
   showGizmos: 0
   showOverlay: 0
   overlayColor: {r: 0, g: 0, b: 0, a: 0.5}
---- !u!114 &7733781569213782225
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7733781569213782238}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 09c64e5108709d44da4009c20248006e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  syncMode: 0
-  syncInterval: 0.1
-  moveSpeed: 8
 --- !u!114 &-613388586093088314
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -229,3 +214,21 @@ MonoBehaviour:
   - {fileID: 2100000, guid: 4f43e53172896c246bcddbc1bade2a55, type: 2}
   - {fileID: 2100000, guid: 56665db060240a040b9c67c3d161ffe6, type: 2}
   spawnRadius: 8
+--- !u!114 &7733781569213782225
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7733781569213782238}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 09c64e5108709d44da4009c20248006e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  syncMode: 0
+  syncInterval: 0.1
+  correctSyncColor: {r: 0.14509805, g: 0.21568628, b: 0.15686275, a: 0}
+  falseSyncColor: {r: 0.3764706, g: 0.1882353, b: 0.21568628, a: 0}
+  mainRenderer: {fileID: 4430628397295926967}
+  moveSpeed: 8
