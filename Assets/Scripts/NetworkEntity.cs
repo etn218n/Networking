@@ -9,13 +9,14 @@ public abstract class NetworkEntity : NetworkBehaviour, IEntity
     [SerializeField] protected Color falseSyncColor;
     [SerializeField] protected Renderer mainRenderer;
     
+    [SyncVar(hook = nameof(OnColorUpdated))]
     protected Color originalColor;
-    
+
     protected virtual void Awake()
     {
         originalColor = mainRenderer.material.color;
     }
-    
+
     protected virtual void OnEnable()
     {
         GameManager.Instance.Subscribe(this);
@@ -30,6 +31,18 @@ public abstract class NetworkEntity : NetworkBehaviour, IEntity
     {
         if (Input.GetKeyDown(KeyCode.C))
             CmdCheckState();
+    }
+
+    protected void OnColorUpdated(Color oldColor, Color newColor)
+    {
+        mainRenderer.material.color = newColor;
+    }
+
+    [Command]
+    public void CmdUpdateColor(Color color)
+    {
+        originalColor = color;
+        mainRenderer.material.color = color;
     }
 
     [Command(requiresAuthority = false)]
@@ -62,13 +75,13 @@ public abstract class NetworkEntity : NetworkBehaviour, IEntity
     {
         var hash = new Hash128();
         
-        hash.Append(transform.position.x.ToString("F3"));
-        hash.Append(transform.position.y.ToString("F3"));
-        hash.Append(transform.position.z.ToString("F3"));
-        hash.Append(transform.rotation.x.ToString("F3"));
-        hash.Append(transform.rotation.y.ToString("F3"));
-        hash.Append(transform.rotation.z.ToString("F3"));
-        hash.Append(transform.rotation.w.ToString("F3"));
+        hash.Append(transform.position.x.ToString("F1"));
+        hash.Append(transform.position.y.ToString("F1"));
+        hash.Append(transform.position.z.ToString("F1"));
+        hash.Append(transform.rotation.x.ToString("F1"));
+        hash.Append(transform.rotation.y.ToString("F1"));
+        hash.Append(transform.rotation.z.ToString("F1"));
+        hash.Append(transform.rotation.w.ToString("F1"));
             
         var hashString = hash.ToString();
             

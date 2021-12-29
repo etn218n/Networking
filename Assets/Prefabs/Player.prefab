@@ -93,7 +93,7 @@ GameObject:
   - component: {fileID: 1843186963770434231}
   - component: {fileID: 6203445761147555447}
   - component: {fileID: 7733781569213782227}
-  - component: {fileID: 7733781569213782224}
+  - component: {fileID: 1181823897168871548}
   - component: {fileID: -613388586093088314}
   - component: {fileID: 7733781569213782225}
   m_Layer: 0
@@ -165,7 +165,7 @@ MonoBehaviour:
   visible: 0
   m_AssetId: 8aeabf2bf1da71f4e93f545b52be7e0c
   hasSpawned: 0
---- !u!114 &7733781569213782224
+--- !u!114 &1181823897168871548
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -174,26 +174,27 @@ MonoBehaviour:
   m_GameObject: {fileID: 7733781569213782238}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2f74aedd71d9a4f55b3ce499326d45fb, type: 3}
+  m_Script: {fileID: 11500000, guid: 2c6e8001e79980341af98dc404133ebd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   syncMode: 0
   syncInterval: 0.1
-  clientAuthority: 0
-  sendInterval: 0.05
-  syncPosition: 1
-  syncRotation: 1
-  syncScale: 0
-  interpolatePosition: 1
-  interpolateRotation: 1
-  interpolateScale: 0
-  bufferTimeMultiplier: 1
-  bufferSizeLimit: 64
-  catchupThreshold: 4
-  catchupMultiplier: 0.1
-  showGizmos: 0
-  showOverlay: 0
-  overlayColor: {r: 0, g: 0, b: 0, a: 0.5}
+  _useLocalSpace: 1
+  _intervalType: 0
+  _synchronizeInterval: 0.05
+  _smoothingLoop: 1
+  _interpolationFallbehind: 0.06
+  _extrapolationSpan: 0
+  _teleportThreshold: 0
+  _clientAuthoritative: 0
+  _synchronizeToOwner: 0
+  _compressSmall: 0
+  _synchronizePosition: 0
+  _snapPosition: 0
+  _synchronizeRotation: 0
+  _snapRotation: 0
+  _synchronizeScale: 1
+  _snapScale: 0
 --- !u!114 &-613388586093088314
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -208,7 +209,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   syncMode: 0
   syncInterval: 0.1
-  mainRenderer: {fileID: 4430628397295926967}
   colorMaterials:
   - {fileID: 2100000, guid: eb110656a5eebdb4e8657b815f080b14, type: 2}
   - {fileID: 2100000, guid: 4f43e53172896c246bcddbc1bade2a55, type: 2}

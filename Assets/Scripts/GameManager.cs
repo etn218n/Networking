@@ -37,12 +37,20 @@ public class GameManager : MonoBehaviour
 
     private void FixedUpdate()
     {
-        Physics.Simulate(Time.fixedDeltaTime);
-        
         ticks++;
-        
+
         foreach (var entity in entities)
+        {
+            entity.OnPreFixedUpdate();
             entity.OnFixedUpdate(Time.fixedDeltaTime);
+        }
+        
+        Physics.Simulate(Time.fixedDeltaTime);
+
+        foreach (var entity in entities)
+        {
+            entity.OnPostFixedUpdate();
+        }
     }
 
     public void Subscribe(IEntity entity) => entities.Add(entity);

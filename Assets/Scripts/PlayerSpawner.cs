@@ -1,19 +1,23 @@
 ﻿using Mirror;
 using System.Collections.Generic;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 public class PlayerSpawner : NetworkBehaviour
 {
     [Header("Visual")]
-    [SerializeField] private Renderer mainRenderer;
     [SerializeField] private List<Material> colorMaterials;
     
     [Header("Spawn Settings")] 
     [Range(1f, 20f)]
     [SerializeField] private float spawnRadius;
 
-    [SyncVar(hook = nameof(OnColorIndexUpdated))] 
-    private int currentColorIndex;
+    private NetworkEntity networkEntity;
+
+    private void Awake()
+    {
+        networkEntity = GetComponent<NetworkEntity>();
+    }
 
     public override void OnStartLocalPlayer()
     {
@@ -36,13 +40,14 @@ public class PlayerSpawner : NetworkBehaviour
             return;
         
         var index = (NetworkManager.singleton.numPlayers - 1) % colorMaterials.Count;
-
-        currentColorIndex = index;
-        mainRenderer.material = colorMaterials[index];
+        
+        RpcReceiveColor(colorMaterials[index].color);
     }
 
-    private void OnColorIndexUpdated(int oldIndex, int newIndex)
+    [ClientRpc]
+    private void RpcReceiveColor(Color color)
     {
-        mainRenderer.material = colorMaterials[newIndex];
+        if (hasAuthority)
+            networkEntity.CmdUpdateColor(color);
     }
 }
