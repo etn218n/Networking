@@ -40,17 +40,12 @@ public class GameManager : MonoBehaviour
         ticks++;
 
         foreach (var entity in entities)
-        {
-            entity.OnPreFixedUpdate();
             entity.OnFixedUpdate(Time.fixedDeltaTime);
-        }
-        
+
         Physics.Simulate(Time.fixedDeltaTime);
 
         foreach (var entity in entities)
-        {
             entity.OnPostFixedUpdate();
-        }
     }
 
     public void Subscribe(IEntity entity) => entities.Add(entity);

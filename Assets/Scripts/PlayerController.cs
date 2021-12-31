@@ -1,18 +1,24 @@
 using Mirror;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class PlayerController : NetworkEntity
 {
+    public const int MaxBufferSize = 100;
+    
     [Header("Stats")]
-    [SerializeField] private float moveSpeed;
+    [SerializeField] 
+    private float moveSpeed;
 
-    public const int MaxInputBufferSize = 100;
+    private List<InputState>  clientInputStateBuffer;
+    private List<EntityState> clientLocalEntityStateBuffer;
 
-    private List<InputState> inputBuffer = new List<InputState>(MaxInputBufferSize);
-    private InputState latestInputState;
-    private InputState previousProcessedInputState;
+    private Queue<EntityState> clientReceivedEntityStateBuffer;
+    private Queue<InputState>  serverInputStateBuffer;
 
+    private InputState? nextInputStateFromClient;
+    
     private Vector3 inputVector;
     private Rigidbody rigidBody;
 
@@ -21,6 +27,12 @@ public class PlayerController : NetworkEntity
         base.Awake();
         
         rigidBody = GetComponent<Rigidbody>();
+        
+        clientInputStateBuffer          = new List<InputState>(MaxBufferSize);
+        clientLocalEntityStateBuffer    = new List<EntityState>(MaxBufferSize);
+        
+        clientReceivedEntityStateBuffer = new Queue<EntityState>(MaxBufferSize);
+        serverInputStateBuffer          = new Queue<InputState>(MaxBufferSize);
     }
 
     public override void OnUpdate(float deltaTime)
@@ -33,41 +45,56 @@ public class PlayerController : NetworkEntity
     {
         if (isLocalPlayer)
         {
+            if (clientReceivedEntityStateBuffer.Any())
+                RollbackState(clientReceivedEntityStateBuffer.Dequeue());
+
             var inputState = new InputState { Ticks = GameManager.Instance.Ticks, MoveVector = inputVector };
 
-            inputBuffer.Add(inputState);
+            clientInputStateBuffer.Add(inputState);
 
             CmdSendInputStateToServer(inputState);
-            
-            var desiredVelocity = inputVector.normalized * moveSpeed;
-            
-            Move(desiredVelocity, fixedDeltaTime);
+
+            Move(inputVector.normalized * moveSpeed, fixedDeltaTime);
         }
 
-        if (isServer)
+        if (isServer && serverInputStateBuffer.Any())
         {
-            var desiredVelocity = latestInputState.MoveVector.normalized * moveSpeed;
-            
-            Move(desiredVelocity, fixedDeltaTime);
+            nextInputStateFromClient = serverInputStateBuffer.Dequeue();
+
+            Move(nextInputStateFromClient.Value.MoveVector.normalized * moveSpeed, fixedDeltaTime);
         }
     }
 
     public override void OnPostFixedUpdate()
     {
-        if (isServer && latestInputState.Ticks > previousProcessedInputState.Ticks)
+        if (isLocalPlayer)
         {
             var entityState = new EntityState
             {
-                Ticks = latestInputState.Ticks,
-                Position = rigidBody.position,
-                LinearVelocity = rigidBody.velocity,
+                Ticks           = GameManager.Instance.Ticks,
+                Position        = rigidBody.position,
+                LinearVelocity  = rigidBody.velocity,
                 AngularVelocity = rigidBody.angularVelocity,
-                Orientation = rigidBody.rotation
+                Orientation     = rigidBody.rotation
             };
         
-            RpcSendEntityStateToClient(entityState);
+            clientLocalEntityStateBuffer.Add(entityState);
+        }
+        
+        if (isServer && nextInputStateFromClient.HasValue)
+        {
+            var entityState = new EntityState
+            {
+                Ticks           = nextInputStateFromClient.Value.Ticks,
+                Position        = rigidBody.position,
+                LinearVelocity  = rigidBody.velocity,
+                AngularVelocity = rigidBody.angularVelocity,
+                Orientation     = rigidBody.rotation
+            };
+        
+            TargetSendEntityStateToClient(entityState);
 
-            previousProcessedInputState = latestInputState;
+            nextInputStateFromClient = null;
         }
     }
 
@@ -84,38 +111,69 @@ public class PlayerController : NetworkEntity
 
         inputVector = new Vector3(x, 0f, y);
     }
-
-    [ClientRpc]
-    private void RpcSendEntityStateToClient(EntityState entityState)
+    
+    [Client]
+    private void RollbackState(EntityState serverEntityState)
     {
-        var index = inputBuffer.FindIndex(input => input.Ticks == entityState.Ticks);
-        
-        if (index != -1)
-            inputBuffer.RemoveRange(0, index + 1);
+        var index = clientInputStateBuffer.FindIndex(input => input.Ticks == serverEntityState.Ticks);
 
-        rigidBody.position        = entityState.Position;
-        rigidBody.rotation        = entityState.Orientation;
-        rigidBody.velocity        = entityState.LinearVelocity;
-        rigidBody.angularVelocity = entityState.AngularVelocity;
+        if (index != -1)
+        {
+            if (Vector3.Distance(clientLocalEntityStateBuffer[index].Position, serverEntityState.Position) < 0.00001f)
+            {
+                clientInputStateBuffer.RemoveRange(0, index + 1);
+                clientLocalEntityStateBuffer.RemoveRange(0, index + 1);
+                return;
+            }
+
+            clientInputStateBuffer.RemoveRange(0, index + 1);
+            clientLocalEntityStateBuffer.RemoveRange(0, index + 1);
+        }
+        
+        var numberOfCorrection = 1;
+
+        rigidBody.position        = serverEntityState.Position;
+        rigidBody.rotation        = serverEntityState.Orientation;
+        rigidBody.velocity        = serverEntityState.LinearVelocity;
+        rigidBody.angularVelocity = serverEntityState.AngularVelocity;
         
         Physics.SyncTransforms();
 
-        foreach (var inputState in inputBuffer)
+        foreach (var inputState in clientInputStateBuffer)
         {
-            var desiredVelocity = inputState.MoveVector.normalized * moveSpeed;
-            
-            Move(desiredVelocity, Time.fixedDeltaTime);
+            Move(inputState.MoveVector.normalized * moveSpeed, Time.fixedDeltaTime);
             
             Physics.Simulate(Time.fixedDeltaTime);
+
+            numberOfCorrection++;
         }
+        
+        Debug.Log($"{gameObject.name} performed {numberOfCorrection} correction steps.");
     }
 
+    [TargetRpc]
+    private void TargetSendEntityStateToClient(EntityState entityState)
+    {
+        if (!clientReceivedEntityStateBuffer.Any())
+        {
+            clientReceivedEntityStateBuffer.Enqueue(entityState);
+            return;
+        }
+        
+        if (entityState.Ticks > clientReceivedEntityStateBuffer.Last().Ticks)
+            clientReceivedEntityStateBuffer.Enqueue(entityState);
+    }
+    
     [Command]
     private void CmdSendInputStateToServer(InputState inputState)
     {
-        if (inputState.Ticks < latestInputState.Ticks)
+        if (!serverInputStateBuffer.Any())
+        {
+            serverInputStateBuffer.Enqueue(inputState);
             return;
-
-        latestInputState = inputState;
+        }
+        
+        if (inputState.Ticks > serverInputStateBuffer.Last().Ticks)
+            serverInputStateBuffer.Enqueue(inputState);
     }
 }
