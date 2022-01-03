@@ -14,7 +14,6 @@ GameObject:
   - component: {fileID: 4382968916439519928}
   - component: {fileID: 4382968916439519932}
   - component: {fileID: 4382968916439519934}
-  - component: {fileID: 8638422824870340420}
   - component: {fileID: 4382968916439519935}
   m_Layer: 0
   m_Name: Cube
@@ -132,36 +131,6 @@ MonoBehaviour:
   visible: 0
   m_AssetId: f3b4f285f524a1d42a11839f1bc669e6
   hasSpawned: 0
---- !u!114 &8638422824870340420
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4382968916439519911}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2c6e8001e79980341af98dc404133ebd, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  syncMode: 0
-  syncInterval: 0.1
-  _useLocalSpace: 1
-  _intervalType: 0
-  _synchronizeInterval: 0.05
-  _smoothingLoop: 1
-  _interpolationFallbehind: 0
-  _extrapolationSpan: 0
-  _teleportThreshold: 0
-  _clientAuthoritative: 0
-  _synchronizeToOwner: 0
-  _compressSmall: 0
-  _synchronizePosition: 0
-  _snapPosition: 0
-  _synchronizeRotation: 0
-  _snapRotation: 0
-  _synchronizeScale: 1
-  _snapScale: 0
 --- !u!114 &4382968916439519935
 MonoBehaviour:
   m_ObjectHideFlags: 0

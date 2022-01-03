@@ -65,7 +65,7 @@ public class PlayerController : NetworkEntity
         }
     }
 
-    public override void OnPostFixedUpdate()
+    public override void OnPostFixedUpdate(float fixedDeltaTime)
     {
         if (isLocalPlayer)
         {
@@ -130,7 +130,7 @@ public class PlayerController : NetworkEntity
             clientLocalEntityStateBuffer.RemoveRange(0, index + 1);
         }
         
-        var numberOfCorrection = 1;
+        var numberOfCorrections = 1;
 
         rigidBody.position        = serverEntityState.Position;
         rigidBody.rotation        = serverEntityState.Orientation;
@@ -145,35 +145,27 @@ public class PlayerController : NetworkEntity
             
             Physics.Simulate(Time.fixedDeltaTime);
 
-            numberOfCorrection++;
+            numberOfCorrections++;
         }
         
-        Debug.Log($"{gameObject.name} performed {numberOfCorrection} correction steps.");
+        Debug.Log($"{gameObject.name} performed {numberOfCorrections} correction steps.");
     }
 
     [TargetRpc]
-    private void TargetSendEntityStateToClient(EntityState entityState)
+    private void TargetSendEntityStateToClient(EntityState serverEntityState)
     {
-        if (!clientReceivedEntityStateBuffer.Any())
-        {
-            clientReceivedEntityStateBuffer.Enqueue(entityState);
+        if (clientReceivedEntityStateBuffer.Any() && serverEntityState.Ticks <= clientReceivedEntityStateBuffer.Last().Ticks)
             return;
-        }
         
-        if (entityState.Ticks > clientReceivedEntityStateBuffer.Last().Ticks)
-            clientReceivedEntityStateBuffer.Enqueue(entityState);
+        clientReceivedEntityStateBuffer.Enqueue(serverEntityState);
     }
     
     [Command]
-    private void CmdSendInputStateToServer(InputState inputState)
+    private void CmdSendInputStateToServer(InputState clientInputState)
     {
-        if (!serverInputStateBuffer.Any())
-        {
-            serverInputStateBuffer.Enqueue(inputState);
+        if (serverInputStateBuffer.Any() && clientInputState.Ticks <= serverInputStateBuffer.Last().Ticks)
             return;
-        }
         
-        if (inputState.Ticks > serverInputStateBuffer.Last().Ticks)
-            serverInputStateBuffer.Enqueue(inputState);
+        serverInputStateBuffer.Enqueue(clientInputState);
     }
 }

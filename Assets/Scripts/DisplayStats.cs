@@ -145,9 +145,10 @@ namespace Utilities
 
             var fps = CalculateFPS().ToString("F0");
             var ping = Math.Round(NetworkTime.rtt * 1000);
+            var ticks = GameManager.Instance.ServerTicks;
 
             GUILayout.BeginArea(new Rect(0, Screen.height - fontSize * 2, Screen.width, fontSize * 2));
-            GUILayout.Label($"<color=#ABB2BF>FPS: {fps}       Ping: {ping} ms</color>", style);
+            GUILayout.Label($"<color=#ABB2BF>FPS: {fps}       Ping: {ping} ms       Server ticks: {ticks}</color>", style);
             GUILayout.EndArea();
         }
         

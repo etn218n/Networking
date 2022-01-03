@@ -75,13 +75,13 @@ public abstract class NetworkEntity : NetworkBehaviour, IEntity
     {
         var hash = new Hash128();
         
-        hash.Append(transform.position.x.ToString("F1"));
-        hash.Append(transform.position.y.ToString("F1"));
-        hash.Append(transform.position.z.ToString("F1"));
-        hash.Append(transform.rotation.x.ToString("F1"));
-        hash.Append(transform.rotation.y.ToString("F1"));
-        hash.Append(transform.rotation.z.ToString("F1"));
-        hash.Append(transform.rotation.w.ToString("F1"));
+        hash.Append(transform.position.x.ToString("F4"));
+        hash.Append(transform.position.y.ToString("F4"));
+        hash.Append(transform.position.z.ToString("F4"));
+        hash.Append(transform.rotation.x.ToString("F4"));
+        hash.Append(transform.rotation.y.ToString("F4"));
+        hash.Append(transform.rotation.z.ToString("F4"));
+        hash.Append(transform.rotation.w.ToString("F4"));
             
         var hashString = hash.ToString();
             
@@ -90,7 +90,6 @@ public abstract class NetworkEntity : NetworkBehaviour, IEntity
     
     
     public virtual void OnUpdate(float deltaTime) { }
-    public virtual void OnPreFixedUpdate() { }
     public virtual void OnFixedUpdate(float fixedDeltaTime) { }
-    public virtual void OnPostFixedUpdate() { }
+    public virtual void OnPostFixedUpdate(float fixedDeltaTime) { }
 }

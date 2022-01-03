@@ -1,29 +1,27 @@
 using UnityEngine;
 using System.Collections.Generic;
+using Mirror;
 
-public class GameManager : MonoBehaviour
+public class GameManager : NetworkBehaviour
 {
     private static GameManager instance;
     public  static GameManager Instance => instance;
     
     private uint ticks;
     public  uint Ticks => ticks;
-    
+
+    [SyncVar] 
+    private uint serverTicks;
+    public  uint ServerTicks => serverTicks;
+
     private List<IEntity> entities = new List<IEntity>();
     
     private void Awake()
     {
-        if (instance != null && instance != this)
-        {
-            Destroy(this.gameObject);
-            return;
-        }
-        
         instance = this;
+        syncInterval = Time.fixedDeltaTime;
 
         Physics.autoSimulation = false;
-
-        DontDestroyOnLoad(this.gameObject);
     }
 
     private void Update()
@@ -39,13 +37,16 @@ public class GameManager : MonoBehaviour
     {
         ticks++;
 
+        if (isServer)
+            serverTicks = ticks;
+
         foreach (var entity in entities)
             entity.OnFixedUpdate(Time.fixedDeltaTime);
 
         Physics.Simulate(Time.fixedDeltaTime);
 
         foreach (var entity in entities)
-            entity.OnPostFixedUpdate();
+            entity.OnPostFixedUpdate(Time.fixedDeltaTime);
     }
 
     public void Subscribe(IEntity entity) => entities.Add(entity);

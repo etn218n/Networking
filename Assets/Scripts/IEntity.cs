@@ -3,5 +3,5 @@
     void OnDebug();
     void OnUpdate(float deltaTime);
     void OnFixedUpdate(float fixedDeltaTime);
-    void OnPostFixedUpdate();
+    void OnPostFixedUpdate(float fixedDeltaTime);
 }
